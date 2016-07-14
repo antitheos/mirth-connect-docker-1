@@ -1,5 +1,4 @@
 FROM java
-
 MAINTAINER Ade Ayoade <antitheos@gmail.com>
 
 ENV MIRTH_CONNECT_VERSION 3.4.1.8057.b139
@@ -30,9 +29,11 @@ RUN \
 
 WORKDIR /opt/mirth-connect
 
-EXPOSE 8080 8443
+EXPOSE 80 443
 
+COPY mirth.properties /opt/mirth-connect/conf/
 COPY docker-entrypoint.sh /
+
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
 CMD ["java", "-jar", "mirth-server-launcher.jar"]
