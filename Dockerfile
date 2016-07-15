@@ -10,13 +10,22 @@ RUN useradd -u 1000 mirth
 
 # grab gosu for easy step-down from root
 RUN gpg --keyserver pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates wget && rm -rf /var/lib/apt/lists/* \
+RUN apt-get update && apt-get install -y --no-install-recommends authbind && apt-get install -y --no-install-recommends ca-certificates wget && rm -rf /var/lib/apt/lists/* \
 	&& wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/1.2/gosu-$(dpkg --print-architecture)" \
 	&& wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/1.2/gosu-$(dpkg --print-architecture).asc" \
 	&& gpg --verify /usr/local/bin/gosu.asc \
 	&& rm /usr/local/bin/gosu.asc \
 	&& chmod +x /usr/local/bin/gosu
 
+
+RUN touch /etc/authbind/byport/80 && \
+  chown mirth:mirth /etc/authbind/byport/80 && \
+  chmod 755 /etc/authbind/byport/80
+
+RUN touch /etc/authbind/byport/443 && \
+  chown mirth:mirth /etc/authbind/byport/443 && \
+  chmod 755 /etc/authbind/byport/443
+  
 VOLUME /opt/mirth-connect/appdata
 
 RUN \
@@ -36,4 +45,4 @@ COPY docker-entrypoint.sh /
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
-CMD ["java", "-jar", "mirth-server-launcher.jar"]
+CMD ["authbind", "java", "-jar", "mirth-server-launcher.jar"]
